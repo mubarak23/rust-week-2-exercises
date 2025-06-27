@@ -2,14 +2,21 @@ use hex::{decode, encode};
 
 pub fn decode_hex(hex_str: &str) -> Result<Vec<u8>, String> {
     // TODO: Decode hex string into Vec<u8>, return error string on failure
+    if hex_str.len() % 2 !=0 {
+        return Err("wrong hex code".to_string());
+    }
+
+    decode(hex_str).map_err(|e| format!("Invalid hex string: {}", e))
 }
 
 pub fn to_big_endian(bytes: &[u8]) -> Vec<u8> {
     // TODO: Reverse the byte order of input slice and return as Vec<u8>
+    bytes.iter().rev().copied().collect()
 }
 
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
     // TODO: Implement conversion of bytes slice to hex string
+    encode(bytes).to_lowercase()
 }
 
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, hex::FromHexError> {
