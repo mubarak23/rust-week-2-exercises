@@ -43,6 +43,16 @@ pub enum ScriptType {
 
 pub fn classify_script(script: &[u8]) -> ScriptType {
     // TODO: Match script pattern and return corresponding ScriptType
+    match script {
+       [0x76, 0xa9, 0x14, .., 0x88, 0xac] if script.len() == 25 => {
+        ScriptType::P2PKH
+        },
+        [0x00, 0x14, ..] if script.len() == 22 => {
+            ScriptType::P2WPKH
+        },
+       _ => ScriptType::Unknown
+
+    }
 }
 
 // TODO: complete Outpoint tuple struct
@@ -50,6 +60,7 @@ pub struct Outpoint();
 
 pub fn read_pushdata(script: &[u8]) -> &[u8] {
     // TODO: Return the pushdata portion of the script slice (assumes pushdata starts at index 2)
+    &script[2..]
 }
 
 pub trait Wallet {
@@ -63,11 +74,17 @@ pub struct TestWallet {
 impl Wallet for TestWallet {
     fn balance(&self) -> u64 {
         // TODO: Return the wallet's confirmed balance
+        self.confirmed
     }
 }
 
 pub fn apply_fee(balance: &mut u64, fee: u64) {
     // TODO: Subtract fee from mutable balance reference
+    if *balance >= fee {
+        *balance -= fee; 
+    } else {
+         *balance = 0;
+    }
 }
 
 pub fn move_txid(txid: String) -> String {
