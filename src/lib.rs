@@ -19,16 +19,20 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
     encode(bytes).to_lowercase()
 }
 
-pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, hex::FromHexError> {
+pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, String> {
     // TODO: Implement conversion of hex string to bytes vector
+    decode(hex).map_err(|e|format!("Fail to decode hex string: {}", e))
 }
 
 pub fn swap_endian_u32(num: u32) -> [u8; 4] {
     // TODO: Implement little-endian byte swap for u32
+    num.to_le_bytes()
 }
 
 pub fn parse_satoshis(input: &str) -> Result<u64, String> {
     // TODO: Parse input string to u64, return error string if invalid
+    input.trim().parse::<u64>()
+    .map_err(|_| format!("Invalid Input: {}", input))
 }
 
 pub enum ScriptType {
