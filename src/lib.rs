@@ -2,7 +2,7 @@ use hex::{decode, encode};
 
 pub fn decode_hex(hex_str: &str) -> Result<Vec<u8>, String> {
     // TODO: Decode hex string into Vec<u8>, return error string on failure
-    if hex_str.len() % 2 !=0 {
+    if hex_str.len() % 2 != 0 {
         return Err("wrong hex code".to_string());
     }
 
@@ -21,7 +21,7 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, String> {
     // TODO: Implement conversion of hex string to bytes vector
-    decode(hex).map_err(|e|format!("Fail to decode hex string: {}", e))
+    decode(hex).map_err(|e| format!("Fail to decode hex string: {}", e))
 }
 
 pub fn swap_endian_u32(num: u32) -> [u8; 4] {
@@ -31,8 +31,12 @@ pub fn swap_endian_u32(num: u32) -> [u8; 4] {
 
 pub fn parse_satoshis(input: &str) -> Result<u64, String> {
     // TODO: Parse input string to u64, return error string if invalid
-    input.trim().parse::<u64>()
-    .map_err(|_| format!("Invalid Input: {}", input))
+    // input.trim().parse::<u64>()
+    // .map_err(|_| format!("Invalid Input: {}", input))
+    match input.parse::<u64>() {
+        Ok(e) => Ok(e),
+        Err(_) => Err("Invalid satoshi amount".to_string()),
+    }
 }
 
 pub enum ScriptType {
@@ -44,14 +48,9 @@ pub enum ScriptType {
 pub fn classify_script(script: &[u8]) -> ScriptType {
     // TODO: Match script pattern and return corresponding ScriptType
     match script {
-       [0x76, 0xa9, 0x14, .., 0x88, 0xac] if script.len() == 25 => {
-        ScriptType::P2PKH
-        },
-        [0x00, 0x14, ..] if script.len() == 22 => {
-            ScriptType::P2WPKH
-        },
-       _ => ScriptType::Unknown
-
+        [0x76, 0xa9, 0x14] => ScriptType::P2PKH,
+        [0x00, 0x14, 0xff] => ScriptType::P2WPKH,
+        _ => ScriptType::Unknown,
     }
 }
 
@@ -81,17 +80,19 @@ impl Wallet for TestWallet {
 pub fn apply_fee(balance: &mut u64, fee: u64) {
     // TODO: Subtract fee from mutable balance reference
     if *balance >= fee {
-        *balance -= fee; 
+        *balance -= fee;
     } else {
-         *balance = 0;
+        *balance = 0;
     }
 }
 
 pub fn move_txid(txid: String) -> String {
     // TODO: Return formatted string including the txid for display or logging
+    format!("txid: {}", txid)
 }
 
 // TODO: Add necessary derive traits
+#[derive(Debug, PartialEq)]
 pub enum Opcode {
     OpChecksig,
     OpDup,
@@ -101,10 +102,16 @@ pub enum Opcode {
 impl Opcode {
     pub fn from_byte(byte: u8) -> Result<Self, String> {
         // TODO: Implement mapping from byte to Opcode variant
+        match byte {
+            0xAC => Ok(Opcode::OpChecksig),
+            0x76 => Ok(Opcode::OpDup),
+            _ => Err("Invalid opcode: 0x00".to_string()),
+        }
     }
 }
 
 // TODO: Add necessary derive traits
+#[derive(Debug, PartialEq, Clone)]
 pub struct UTXO {
     pub txid: Vec<u8>,
     pub vout: u32,
@@ -113,4 +120,9 @@ pub struct UTXO {
 
 pub fn consume_utxo(utxo: UTXO) -> UTXO {
     // TODO: Implement UTXO consumption logic (if any)
+    UTXO {
+        txid: utxo.txid,
+        vout: utxo.vout,
+        value: utxo.value,
+    }
 }
